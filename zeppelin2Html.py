@@ -7,20 +7,16 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonConsoleLexer
 from pygments.lexers import get_lexer_by_name
-from pygments.styles import get_all_styles
-
-STYLES = list(get_all_styles())
 
 
 @click.command()
 @click.argument('zeppelin_file', type=click.Path(exists=True))
-@click.option('-s', '--style', type=click.Choice(STYLES), default='monokai')
-def convert(zeppelin_file, style):
-    click.echo('Converting Zeppelin file: %s to PDF using style: %s' % (zeppelin_file, style))
+def convert(zeppelin_file):
+    click.echo('Converting Zeppelin file: %s to HTML' % (zeppelin_file))
 
     with codecs.open(zeppelin_file, 'r', 'utf-8-sig') as z:
         d_zeppelin = json.load(z)
-        formatter = HtmlFormatter(full=False, style=style)
+        formatter = HtmlFormatter(full=True)
         html = ['<link rel="stylesheet" type="text/css" href="style.css">']
         for d_para in d_zeppelin['paragraphs']:
             # click.echo(d_para['id'])
@@ -31,12 +27,8 @@ def convert(zeppelin_file, style):
         html_file = pathlib.Path(parent_dir, input_file.stem + '.html')
         with open(html_file, 'w') as f:
             f.write("\n".join(html))
-        style_css = pathlib.Path(parent_dir, 'style.css')
-        with open(style_css, 'w') as f:
-            f.write(formatter.get_style_defs('body'))
 
         click.echo('Html file: %s' % html_file)
-        click.echo('Css file: %s' % style_css)
 
 
 def para2Html(formatter, d_para):
